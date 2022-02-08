@@ -12,7 +12,6 @@ if (!empty($_REQUEST['theme'])) {
         <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" id="customCSS">
         <link href="../../css/custom/<?php echo $theme; ?>.css" rel="stylesheet" type="text/css" id="customCSS">
         <link href="../../css/main.css" rel="stylesheet" type="text/css">
-        <meta property="og:image" content="../../../videos/userPhoto/logo.png" />
     </head>
     <body class="" >
         <nav class="navbar navbar-default navbar-fixed-top " id="mainNavBar">
