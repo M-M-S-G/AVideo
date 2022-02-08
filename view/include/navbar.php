@@ -730,7 +730,7 @@ if (!User::isLogged() && !empty($advancedCustomUser->userMustBeLoggedIn) && !emp
                                             <li>
                                                 <a href="<?php echo $global['webSiteRootURL']; ?>logoff" >
                                                     <?php
-                                                    if (!empty($_COOKIE['user']) && !empty($_COOKIE['pass'])) {
+                                                    /*if (!empty($_COOKIE['user']) && !empty($_COOKIE['pass'])) {
                                                         ?>
                                                         <i class="fas fa-lock text-muted" style="opacity: 0.2;"></i>
                                                         <?php
@@ -738,7 +738,7 @@ if (!User::isLogged() && !empty($advancedCustomUser->userMustBeLoggedIn) && !emp
                                                         ?>
                                                         <i class="fas fa-lock-open text-muted" style="opacity: 0.2;"></i>
                                                         <?php
-                                                    } ?>
+                                                    }*/ ?>
                                                     <i class="fas fa-sign-out-alt"></i> <?php echo __("Sign out"); ?>
                                                 </a>
                                             </li>
