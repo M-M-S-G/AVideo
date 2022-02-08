@@ -12,6 +12,7 @@ if (!empty($_REQUEST['theme'])) {
         <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" id="customCSS">
         <link href="../../css/custom/<?php echo $theme; ?>.css" rel="stylesheet" type="text/css" id="customCSS">
         <link href="../../css/main.css" rel="stylesheet" type="text/css">
+        <meta property="og:image" content="../../../videos/userPhoto/logo.png" />
     </head>
     <body class="" >
         <nav class="navbar navbar-default navbar-fixed-top " id="mainNavBar">
@@ -86,7 +87,7 @@ if (!empty($_REQUEST['theme'])) {
                                             <a href="#" data-toggle="tooltip" title="" data-placement="left" data-original-title="Write an article" class="alreadyTooltip">
                                                 <i class="far fa-newspaper"></i> Add Article                                                    </a>
                                         </li>
-                                        <li><a href="#"><span class="fa fa-link"></span> Bulk Embed</a></li>                                        </ul>     
+                                        <li><a href="#"><span class="fa fa-link"></span> Bulk Embed</a></li>                                        </ul>
                                 </div>
                             </li>
                         </ul>
