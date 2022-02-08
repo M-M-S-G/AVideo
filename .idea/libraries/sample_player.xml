@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="sample-player">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/plugin/Live/sample-player.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

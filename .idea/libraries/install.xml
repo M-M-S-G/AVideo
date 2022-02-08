@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="install">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/plugin/User_Location/install/ip2location_db1_ipv6.zip!/" />
+      <root url="jar://$PROJECT_DIR$/plugin/User_Location/install/install.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
