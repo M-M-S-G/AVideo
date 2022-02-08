@@ -2052,7 +2052,7 @@ if (typeof gtag !== \"function\") {
         }
         $config = new Configuration();
         $user = new User($users_id);
-        $code = urlencode(static::createVerificationCode($users_id));
+        $code = static::createVerificationCode($users_id);
         //Create a new PHPMailer instance
         if (!is_object($config)) {
             _error_log("sendVerificationLink: config is not a object " . json_encode($config));
