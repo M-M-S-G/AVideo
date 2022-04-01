@@ -4,7 +4,7 @@ if (file_exists("../videos/configuration.php")) {
     exit;
 }
 
-$installationVersion = "11.5";
+$installationVersion = "11.7";
 
 error_log("Installation: ".__LINE__." ". json_encode($_POST));
 header('Content-Type: application/json');
@@ -141,7 +141,7 @@ if ($mysqli->query($sql) !== true) {
 
 error_log("Installation: ".__LINE__);
 
-$encoder = 'https://encoder1.avideo.com/';
+$encoder = 'https://encoder1.wwbn.net/';
 if (is_dir("{$_POST['systemRootPath']}Encoder")) {
     $encoder = "{$_POST['webSiteRootURL']}Encoder/";
 }

@@ -36,7 +36,6 @@ foreach ($users as $key => $value) {
     }
     if (empty($views)) {
         continue;
-        ;
     }
     $item = [
         'views'=>$views,

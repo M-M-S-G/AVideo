@@ -308,7 +308,9 @@ function base64DataToImage($imgBase64) {
 }
 
 function getRealIpAddr() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) { //check ip from share internet
+    if (isCommandLineInterface()) {
+        $ip = "127.0.0.1";
+    } else if (!empty($_SERVER['HTTP_CLIENT_IP'])) { //check ip from share internet
         $ip = $_SERVER['HTTP_CLIENT_IP'];
     } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) { //to check ip is pass from proxy
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
@@ -1427,6 +1429,9 @@ function getResolutionFromFilename($filename) {
         return $getResolutionFromFilenameArray[$filename];
     }
 
+    if (!preg_match('/^http/i', $filename) && !file_exists($filename)) {
+        return 0;
+    }
     $res = Video::getResolutionFromFilename($filename);
     if (empty($res)) {
         if (preg_match('/[_\/]hd[.\/]/i', $filename)) {
@@ -2010,9 +2015,9 @@ function make_path($path) {
     }
     if (!is_dir($path)) {
         //if(preg_match('/getvideoinfo/i', $path)){var_dump(debug_backtrace());}
-        if(preg_match('/cache/i', $path)){
+        if (preg_match('/cache/i', $path)) {
             $mode = 0777;
-        }else{
+        } else {
             $mode = 0755;
         }
         $created = mkdir($path, $mode, true);
@@ -2491,7 +2496,7 @@ function thereIsAnyRemoteUpdate() {
         return $cache;
     }
 
-    $version = _json_decode(url_get_contents("https://tutorials.avideo.com/version"));
+    $version = _json_decode(url_get_contents("https://tutorials.wwbn.net/version"));
     //$version = _json_decode(url_get_contents("https://tutorialsavideo.b-cdn.net/version", "", 4));
     if (empty($version)) {
         return false;
@@ -2964,7 +2969,9 @@ function verify($url) {
     $cacheFile = sys_get_temp_dir() . '/' . md5($url) . "_verify.log";
     $lifetime = 86400; //24 hours
     error_log("Verification Start {$url}");
-    $verifyURL = "https://search.avideo.com/verify.php?url=" . urlencode($url);
+    $verifyURL = "https://search.ypt.me/verify.php";
+    $verifyURL = addQueryStringParameter($verifyURL, 'url', $global['webSiteRootURL']);
+    $verifyURL = addQueryStringParameter($verifyURL, 'screenshot', 1);
     if (!file_exists($cacheFile) || (time() > (filemtime($cacheFile) + $lifetime))) {
         error_log("Verification Creating the Cache {$url}");
         $result = url_get_contents($verifyURL, '', 5);
@@ -3342,7 +3349,7 @@ function getAdsLeaderBoardTop() {
             return ADs::giveGoogleATimeout($ad->leaderBoardTop->value);
         }
     } else {
-        return '<!-- ADs plugin disabled -->';
+        return false;
     }
 }
 
@@ -3434,18 +3441,20 @@ function convertImageToOG($source, $destination) {
 }
 
 function convertImageToRoku($source, $destination) {
+    return convertImageIfNotExists($source, $destination, 1280, 720);
+}
+
+function convertImageIfNotExists($source, $destination, $width, $height){
     if (empty($source)) {
         _error_log("convertImageToRoku: source image is empty");
         return false;
     }
-
-    $w = 1280;
-    $h = 720;
     if (file_exists($destination)) {
         $sizes = getimagesize($destination);
-        if ($sizes[0] < $w || $sizes[1] < $h) {
-            _error_log("convertImageToRoku: file is smaller " . json_encode($sizes));
+        if ($sizes[0] < $width || $sizes[1] < $height) {
+            _error_log("convertImageIfNotExists: file is smaller " . json_encode($sizes));
             unlink($destination);
+            return false;
         }
     }
     if (!file_exists($destination)) {
@@ -3453,10 +3462,10 @@ function convertImageToRoku($source, $destination) {
             $tmpDir = getTmpDir();
             $fileConverted = $tmpDir . "_jpg_" . uniqid() . ".jpg";
             convertImage($source, $fileConverted, 100);
-            im_resizeV2($fileConverted, $destination, $w, $h, 100);
+            im_resizeV2($fileConverted, $destination, $width, $height, 100);
             @unlink($fileConverted);
         } catch (Exception $exc) {
-            _error_log("convertImageToRoku: " . $exc->getMessage());
+            _error_log("convertImageIfNotExists: " . $exc->getMessage());
             return false;
         }
     }
@@ -3893,6 +3902,15 @@ function _session_start(array $options = []) {
 
 function _mysql_connect() {
     global $global, $mysqlHost, $mysqlUser, $mysqlPass, $mysqlDatabase, $mysqlPort, $mysql_connect_was_closed;
+    
+    $checkValues = array('mysqlHost', 'mysqlUser', 'mysqlPass', 'mysqlDatabase');    
+    
+    foreach ($checkValues as $value) {
+        if(!isset($$value)){
+            _error_log("_mysql_connect Variable NOT set $value");
+        }
+    }
+    
     try {
         if (!_mysql_is_open()) {
             //_error_log('MySQL Connect '. json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
@@ -3901,9 +3919,14 @@ function _mysql_connect() {
             if (!empty($global['mysqli_charset'])) {
                 $global['mysqli']->set_charset($global['mysqli_charset']);
             }
+            if(isCommandLineInterface()){
+                _error_log("_mysql_connect HOST=$mysqlHost,DB=$mysqlDatabase");
+            }
         }
     } catch (Exception $exc) {
         _error_log($exc->getTraceAsString());
+        include $global['systemRootPath'] . 'view/include/offlinePage.php';
+        exit;
         return false;
     }
 }
@@ -3973,6 +3996,7 @@ function clearCache($firstPageOnly = false) {
     rrmdir($dir);
     rrmdir($tmpDir);
     ObjectYPT::deleteCache("getEncoderURL");
+    ObjectYPT::deleteAllSessionCache();
     unlink($lockFile);
     $end = microtime(true) - $start;
     _error_log("clearCache end in {$end} seconds");
@@ -4587,17 +4611,24 @@ function isHLS() {
     return false;
 }
 
-function getRedirectUri() {
-    if (!empty($_GET['redirectUri'])) {
+function getRedirectUri($returnThisIfRedirectUriIsNotSet = false) {
+    if (isValidURL(@$_GET['redirectUri'])) {
         return $_GET['redirectUri'];
     }
-    if (!empty($_SESSION['redirectUri'])) {
+    if (isValidURL(@$_SESSION['redirectUri'])) {
         return $_SESSION['redirectUri'];
     }
-    if (!empty($_SERVER["HTTP_REFERER"])) {
+    if (isValidURL(@$_REQUEST["redirectUri"])) {
+        return $_REQUEST["redirectUri"];
+    }
+    if (isValidURL(@$_SERVER["HTTP_REFERER"])) {
         return $_SERVER["HTTP_REFERER"];
     }
-    return getRequestURI();
+    if (isValidURL($returnThisIfRedirectUriIsNotSet)) {
+        return $returnThisIfRedirectUriIsNotSet;
+    } else {
+        return getRequestURI();
+    }
 }
 
 function setRedirectUri($redirectUri) {
@@ -4814,6 +4845,23 @@ function isValidURL($url) {
         return false;
     }
     if (preg_match("/^http.*/", $url) && filter_var($url, FILTER_VALIDATE_URL)) {
+        return true;
+    }
+    return false;
+}
+
+function isValidURLOrPath($str) {
+    //var_dump(empty($url), !is_string($url), preg_match("/^http.*/", $url), filter_var($url, FILTER_VALIDATE_URL));
+    if (empty($str) || !is_string($str)) {
+        return false;
+    }
+    if (str_starts_with($str, '/')) {
+        return true;
+    }
+    if (preg_match("/^[a-z]:.*/i", $str)) {
+        return true;
+    }
+    if (isValidURL($str)) {
         return true;
     }
     return false;
@@ -5232,6 +5280,9 @@ function getMySQLDate() {
 
 function _file_put_contents($filename, $data, $flags = 0, $context = null) {
     make_path($filename);
+    if(!is_string($value)){
+        $data = _json_encode($data);
+    }
     return file_put_contents($filename, $data, $flags, $context);
 }
 
@@ -5451,8 +5502,17 @@ function _json_encode($object) {
                         if (empty($json) && json_last_error()) {
                             _error_log("_json_encode: Error 6 Found: " . json_last_error_msg());
                             $json = json_encode($objectDecoded, JSON_UNESCAPED_UNICODE);
-                            if (json_last_error()) {
+                            if (empty($json) && json_last_error()) {
                                 _error_log("_json_encode: Error 7 Found: " . json_last_error_msg());
+                                array_walk_recursive($objectDecoded, function (&$item) {
+                                    if (is_string($item)) {
+                                        $item = cleanString($item);
+                                    }
+                                });
+                                $json = json_encode($users);
+                                if (json_last_error()) {
+                                    _error_log("_json_encode: Error 8 Found: " . json_last_error_msg());
+                                }
                             }
                         }
                     }
@@ -5469,6 +5529,12 @@ function _json_decode($object) {
     }
     if (!is_string($object)) {
         return $object;
+    }
+    if(isValidURLOrPath($object)){
+        $content = file_get_contents($object);
+        if(!empty($content)){
+            $object = $content;
+        }
     }
     $json = json_decode($object);
     if ($json === null) {
@@ -5646,14 +5712,14 @@ function forbiddenPage($message = '', $logMessage = false, $unlockPassword = '',
             break;
         }
     }
-    if(empty($unlockPassword) && preg_match('/json/i', $contentType)){
+    if (empty($unlockPassword) && preg_match('/json/i', $contentType)) {
         header("Content-Type: application/json");
         $obj = new stdClass();
         $obj->error = true;
         $obj->msg = $message;
         $obj->forbiddenPage = true;
         die(json_encode($obj));
-    }else{
+    } else {
         header("Content-Type: text/html");
         include $global['systemRootPath'] . 'view/forbiddenPage.php';
     }
@@ -5759,10 +5825,11 @@ function getHostOnlyFromURL($url) {
  */
 function getDeviceID($useRandomString = true) {
     $ip = md5(getRealIpAddr());
+    $pattern = "/[^0-9a-z_.-]/i";
     if (empty($_SERVER['HTTP_USER_AGENT'])) {
         $device = "unknowDevice-{$ip}";
         $device .= '-' . intval(User::getId());
-        return $device;
+        return preg_replace($pattern, '-', $device);
     }
 
     if (empty($useRandomString)) {
@@ -5773,7 +5840,7 @@ function getDeviceID($useRandomString = true) {
                 $device
         );
         $device .= '-' . intval(User::getId());
-        return $device;
+        return preg_replace($pattern, '-', $device);
     }
 
     $cookieName = "yptDeviceID";
@@ -5792,9 +5859,8 @@ function getDeviceID($useRandomString = true) {
             return "getDeviceIDError";
         }
         $_COOKIE[$cookieName] = $_GET[$cookieName];
-        return $_GET[$cookieName];
     }
-    return $_COOKIE[$cookieName];
+    return preg_replace($pattern, '-', $_COOKIE[$cookieName]);
 }
 
 function deviceIdToObject($deviceID) {
@@ -6373,14 +6439,31 @@ function getSocialModal($videos_id, $url = "", $title = "") {
 function getCroppie(
         $buttonTitle,
         $callBackJSFunction,
-        $resultWidth,
-        $resultHeight,
+        $resultWidth = 0,
+        $resultHeight = 0,
         $viewportWidth = 0,
         $boundary = 25,
         $viewportHeight = 0,
         $enforceBoundary = true
 ) {
     global $global;
+
+    if (empty($resultWidth) && empty($resultHeight)) {
+        if (isMobile()) {
+            $viewportWidth = 250;
+        } else {
+            $viewportWidth = 800;
+        }
+
+        if (defaultIsPortrait()) {
+            $resultWidth = 540;
+            $resultHeight = 800;
+        } else {
+            $resultWidth = 1280;
+            $resultHeight = 720;
+        }
+    }
+
     if (empty($viewportWidth)) {
         $viewportWidth = $resultWidth;
     }
@@ -6798,12 +6881,16 @@ function deleteStatsNotifications() {
     ObjectYPT::deleteCache($cacheName);
 }
 
-function getStatsNotifications($force_recreate = false) {
+function getStatsNotifications($force_recreate = false, $listItIfIsAdminOrOwner = true) {
+    global $__getStatsNotifications__;
     $cacheName = "getStats" . DIRECTORY_SEPARATOR . "getStatsNotifications";
     unset($_POST['sort']);
     if ($force_recreate) {
         Live::deleteStatsCache();
     } else {
+        if(!empty($__getStatsNotifications__)){
+            return $__getStatsNotifications__;
+        }
         $json = ObjectYPT::getCache($cacheName, 0, true);
     }
     if (empty($json) || !empty($json->error) || !isset($json->error)) {
@@ -6864,14 +6951,14 @@ function getStatsNotifications($force_recreate = false) {
                     $u = User::getFromUsername($value['user']);
                     $json['applications'][$key]['users_id'] = $u['id'];
                 }
-                if (!empty($json['applications'][$key]['key'])) {
+                if (!empty($json['applications'][$key]['key']) && $json['applications'][$key]["type"] === "live") {
                     // make sure it is online
                     $lth = new LiveTransmitionHistory();
                     $lth->setTitle($json['applications'][$key]['title']);
                     $lth->setKey($json['applications'][$key]['key']);
                     $lth->setUsers_id($json['applications'][$key]['users_id']);
                     $lth->setLive_servers_id($json['applications'][$key]['live_servers_id']);
-                    $lth->save();
+                    $json['applications'][$key]['live_transmitions_history_id'] = $lth->save();
                 }
             }
         }
@@ -6881,9 +6968,16 @@ function getStatsNotifications($force_recreate = false) {
         //_error_log('getStatsNotifications: 2 cached result');
         $json = object_to_array($json);
     }
-    if (empty($json['countLiveStream']) || $json['countLiveStream'] < $json['total']) {
-        $json['countLiveStream'] = $json['total'];
+
+    foreach ($json['applications'] as $key => $value) {
+        if (!Live::isApplicationListed(@$value['key'], $listItIfIsAdminOrOwner)) {
+            $json['hidden_applications'][] = $value;
+            unset($json['applications'][$key]);
+        }
     }
+
+    $json['countLiveStream'] = count($json['applications']);
+    $__getStatsNotifications__ = $json;
     return $json;
 }
 
@@ -7324,8 +7418,9 @@ function getCDN($type = 'CDN', $id = 0) {
     return empty($_getCDNURL[$index]) ? false : $_getCDNURL[$index];
 }
 
-function getURL($relativePath) {
+function getURL($relativePath, $ignoreCDN = false) {
     global $global;
+    $relativePath = str_replace('\\', '/', $relativePath);
     if (!isset($_SESSION['user']['sessionCache']['getURL'])) {
         $_SESSION['user']['sessionCache']['getURL'] = [];
     }
@@ -7334,7 +7429,11 @@ function getURL($relativePath) {
     }
 
     $file = "{$global['systemRootPath']}{$relativePath}";
-    $url = getCDN() . $relativePath;
+    if (empty($ignoreCDN)) {
+        $url = getCDN() . $relativePath;
+    } else {
+        $url = $global['webSiteRootURL'] . $relativePath;
+    }
     if (file_exists($file)) {
         $cache = @filemtime($file) . '_' . @filectime($file);
         $url = addQueryStringParameter($url, 'cache', $cache);
@@ -7705,7 +7804,13 @@ function isImage($file) {
 }
 
 function isHTMLEmpty($html_string) {
-    return empty(trim(strip_specific_tags($html_string, ['br', 'p'])));
+    $html_string_no_tags = strip_specific_tags($html_string, ['br', 'p', 'span', 'div']);
+    //var_dump($html_string_no_tags, $html_string);
+    return empty(trim(str_replace(array("\r", "\n"), array('', ''), $html_string_no_tags)));
+}
+
+function emptyHTML($html_string){
+    return isHTMLEmpty($html_string);
 }
 
 function totalImageColors($image_path) {

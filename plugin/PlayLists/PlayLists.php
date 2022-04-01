@@ -97,13 +97,15 @@ class PlayLists extends PluginAbstract {
         global $global;
         $obj = $this->getDataObject();
 
-        $css = '<link href="' . getCDN() . 'plugin/PlayLists/style.css" rel="stylesheet" type="text/css"/>';
+        $css = '<link href="' . getURL('plugin/PlayLists/style.css') . '" rel="stylesheet" type="text/css"/>';
         $css .= '<style>.epgProgress.progress-bar-primary{opacity: 0.5;}.epgProgress:hover{opacity: 1.0;}.epgProgressText{border-right: 1px solid #FFF; height:100%;}</style>';
 
         if (!empty(getPlaylists_id())) {
-            $css .= "<link href=\"" . getCDN() . "plugin/PlayLists/playerButton.css\" rel=\"stylesheet\" type=\"text/css\"/>";
+            $css .= "<link href=\"" . getURL('plugin/PlayLists/playerButton.css') . "\" rel=\"stylesheet\" type=\"text/css\"/>";
         }
 
+        include $global['systemRootPath'] . 'plugin/PlayerSkins/mediaSession.php';
+        
         return $css;
     }
 
@@ -743,7 +745,7 @@ class PlayLists extends PluginAbstract {
         return $last['key'];
     }
 
-    public function getLivePosterImage($playlists_id) {
+    public static function getLivePosterImage($playlists_id) {
         $live = AVideoPlugin::loadPluginIfEnabled("Live");
         if ($live) {
             $pl = new PlayList($playlists_id);

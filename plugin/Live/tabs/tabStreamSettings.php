@@ -12,9 +12,10 @@ if ($objLive->allowMultipleLivesPerUser) {
         }
     }
 }
-$islive = isLive();
+$islive = getLiveKey();
 $liveStreamObject = new LiveStreamObject($islive['key'], $islive['live_servers_id'], @$_REQUEST['live_index'], 0);
 $key = $liveStreamObject->getKeyWithIndex(true);
+//var_dump(getLiveKey(), $islive, $key);exit;
 ?>
 <style>
     #streamkey{
@@ -30,7 +31,9 @@ $key = $liveStreamObject->getKeyWithIndex(true);
             <?php
             getInputCopyToClipboard('server', Live::getRTMPLinkWithOutKey(User::getId()));
             ?>
+            <!--
             <small class="label label-info"><i class="fa fa-warning"></i> <?php echo __("If you change your password the Server URL parameters will be changed too."); ?></small>
+            -->
         </div>
         <div class="form-group">
             <label for="streamkey"><i class="fa fa-key"></i> <?php echo __("Stream name/key"); ?>: </label>
@@ -72,7 +75,7 @@ $key = $liveStreamObject->getKeyWithIndex(true);
             <a data-toggle="tab" href="#tabStreamMetaData"><i class="fas fa-key"></i> <?php echo __("Stream Meta Data"); ?></a>
         </li>
         <li class="">
-            <a data-toggle="tab" href="#tabPosterImage"><i class="fas fa-images"></i> <?php echo __("Poster Image"); ?></a>
+            <a style="cursor: pointer;" onclick="avideoModalIframe(webSiteRootURL + 'plugin/Live/view/Live_schedule/uploadPoster.php');"><i class="fas fa-images"></i> <?php echo __("Poster Image"); ?></a>
         </li>
         <?php
         if (empty($objLive->hideUserGroups)) {
@@ -100,7 +103,7 @@ $key = $liveStreamObject->getKeyWithIndex(true);
                             <div class="form-group">
                                 <label for="title"><?php echo __("Password Protect"); ?>:</label>
                                 <?php
-                                echo getInputPassword('password_livestream', 'class="form-control" value="' . $trasnmition['password'] . '"', __("Password Protect"));
+                                echo getInputPassword('password_livestream', 'class="form-control" autocomplete="off" autofill="off"  value="' . $trasnmition['password'] . '"', __("Password Protect"));
                                 ?>
                             </div>  
                             <?php
@@ -169,21 +172,6 @@ $key = $liveStreamObject->getKeyWithIndex(true);
                 </div>
                 <div class="panel-footer">
                     <button type="button" class="btn btn-success btn-block btnSaveStream" id="btnSaveStream"><i class="fas fa-save"></i> <?php echo __("Save Stream Settings"); ?></button>
-                </div>
-            </div>
-        </div>
-        <div id="tabPosterImage" class="tab-pane fade"> 
-            <div class="panel panel-default ">
-                <div class="panel-heading">
-                    <?php
-                    echo __("Upload Poster Image");
-                    ?>
-                    <button class="btn btn-danger btn-sm btn-xs pull-right" id="removePoster">
-                        <i class="far fa-trash-alt"></i> <?php echo __("Remove Poster"); ?>
-                    </button>
-                </div>
-                <div class="panel-body"> 
-                    <input id="input-jpg" type="file" class="file-loading" accept="image/*">
                 </div>
             </div>
         </div>

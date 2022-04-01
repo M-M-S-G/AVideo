@@ -18,6 +18,7 @@ class Live_schedule extends ObjectYPT
     protected $saveTransmition;
     protected $showOnTV;
     protected $scheduled_password;
+    protected $users_id_company;
 
     public static function getSearchFieldsNames()
     {
@@ -27,6 +28,14 @@ class Live_schedule extends ObjectYPT
     public static function getTableName()
     {
         return 'live_schedule';
+    }
+    
+    function getUsers_id_company(): int {
+        return intval($this->users_id_company);
+    }
+
+    function setUsers_id_company($users_id_company): void {
+        $this->users_id_company = intval($users_id_company);
     }
 
     public static function getAllUsers()
@@ -71,11 +80,15 @@ class Live_schedule extends ObjectYPT
         return $rows;
     }
 
-    public static function getPosterPaths($live_schedule_id)
+    public static function getPosterPaths($live_schedule_id, $posterType=0)
     {
         $live_schedule_id = intval($live_schedule_id);
+        $posterType = intval($posterType);
         if (empty($live_schedule_id)) {
             return false;
+        }
+        if(!empty($posterType)){
+            $live_schedule_id = "{$live_schedule_id}_{$posterType}";
         }
 
         $subdir = "live_schedule_posters";
@@ -97,14 +110,23 @@ class Live_schedule extends ObjectYPT
         return $array;
     }
 
-    public static function getPosterURL($live_schedule_id)
-    {
-        $paths = self::getPosterPaths($live_schedule_id);
+    public static function getPosterURL($live_schedule_id, $posterType=0){
+        $paths = self::getPosterPaths($live_schedule_id, $posterType);
         if (file_exists($paths['path'])) {
             return $paths['url'];
         } else {
             return Live::getComingSoonImage();
         }
+    }
+    
+    public static function isLive($live_schedule_id){
+        $ls = self::getFromDb($live_schedule_id);
+        if(empty($ls['key'])){
+            return false;
+        }
+        $isLive = LiveTransmitionHistory::isLive($ls['key']);
+        //var_dump($ls['key'], $isLive);exit;
+        return $isLive;
     }
 
     public static function getAll($users_id=0, $activeHoursAgo=false)
@@ -142,24 +164,36 @@ class Live_schedule extends ObjectYPT
         return $rows;
     }
 
-    public static function getAllActiveLimit($limit = 10)
+    public static function getAllActiveLimit($users_id=0,$limit = 10)
     {
         global $global;
         if (!static::isTableInstalled()) {
             return false;
         }
         // to convert time must load time zone table into mysql
-
-        $sql = "SELECT * FROM  " . static::getTableName() . " WHERE status='a' "
-                . " AND (CONVERT_TZ(scheduled_time, timezone, @@session.time_zone ) > NOW() || scheduled_time > NOW()) "
+        
+        $users_id = intval($users_id);
+        $limit = intval($limit);
+        
+        $sql = "SELECT * FROM  " . static::getTableName() . " WHERE status='a' ";
+        
+        if (!empty($users_id)) {
+            $sql .= " AND users_id = $users_id ";
+        }
+        
+        $sql .= " AND (CONVERT_TZ(scheduled_time, timezone, @@session.time_zone ) > NOW() || scheduled_time > NOW()) "
                 . " ORDER BY scheduled_time ASC LIMIT {$limit} ";
-
+        //echo $sql;
         $res = sqlDAL::readSql($sql);
         $fullData = sqlDAL::fetchAllAssoc($res);
         sqlDAL::close($res);
         $rows = [];
         if ($res != false) {
             foreach ($fullData as $row) {
+                $row['future'] = isTimeForFuture($row['scheduled_time'], $row['timezone']);
+                $row['secondsIntervalHuman'] = secondsIntervalHuman($row['scheduled_time'], $row['timezone']);
+                $row['posterURL'] = self::getPosterURL($row['id']);
+                $row['serverURL'] = Live::getServerURL($row['key'], $row['users_id']);
                 $rows[] = $row;
             }
         } else {
@@ -315,6 +349,10 @@ class Live_schedule extends ObjectYPT
         if (empty($this->showOnTV)) {
             $this->showOnTV = 'NULL';
         }
+        
+        if (empty($this->users_id_company)) {
+            $this->users_id_company = 'NULL';
+        }
 
         if (empty($this->key)) {
             $this->key = uniqid();
@@ -359,6 +397,7 @@ class Live_schedule extends ObjectYPT
         deleteStatsNotifications();
         //ObjectYPT::deleteAllSessionCache();
         ObjectYPT::deleteALLCache();
+        Live::deleteStatsCache(true);
     }
 
     public static function keyExists($key)
@@ -399,5 +438,13 @@ class Live_schedule extends ObjectYPT
         $this->scheduled_password = $scheduled_password;
     }
 
+    static function getUsers_idOrCompany($live_schedule_id) {
+        $lt = new Live_schedule($live_schedule_id);
+        $users_id = $lt->getUsers_id();
+        if(!empty($lt->getUsers_id_company())){
+            $users_id = $lt->getUsers_id_company();
+        }
+        return $users_id;
+    }
 
 }

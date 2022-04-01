@@ -213,10 +213,15 @@ function startRestream($m3u8, $restreamsDestinations, $logFile, $tries = 1)
             error_log("Restreamer.json.php tried too many times, we could not find your stream URL");
             return false;
         }
+        if ($tries === 1) {
+            error_log("Restreamer.json.php ".json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)));
+        }
         error_log("Restreamer.json.php URL ($m3u8) is NOT ready. trying again ({$tries})");
         sleep($tries);
         return startRestream($m3u8, $restreamsDestinations, $logFile, $tries + 1);
     }
+    
+    error_log("Restreamer.json.php isURL200 tries={$tries} ".json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)));
     //sleep(5);
     /*
       $command = "ffmpeg -i {$m3u8} ";
@@ -298,10 +303,9 @@ function getProcess($m3u8)
     return false;
 }
 
-function killIfIsRunning($m3u8)
-{
+function killIfIsRunning($m3u8){
     $process = getProcess($m3u8);
-    error_log("Restreamer.json.php killIfIsRunning checking if there is a process running for {$m3u8} ");
+    //error_log("Restreamer.json.php killIfIsRunning checking if there is a process running for {$m3u8} ");
     if (!empty($process)) {
         error_log("Restreamer.json.php killIfIsRunning there is a process running for {$m3u8} " . json_encode($process));
         $pid = intval($process[1]);
@@ -312,7 +316,7 @@ function killIfIsRunning($m3u8)
         }
         return true;
     } else {
-        error_log("Restreamer.json.php killIfIsRunning there is not a process running for {$m3u8} ");
+        //error_log("Restreamer.json.php killIfIsRunning there is not a process running for {$m3u8} ");
     }
     return false;
 }

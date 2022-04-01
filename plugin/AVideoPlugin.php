@@ -23,7 +23,7 @@ class AVideoPlugin
         $total_time = round(($finish - $global['AVideoPluginStart']), 4);
         $timeLimit = empty($global['noDebug']) ? 0.5 : 1;
         if ($total_time > $timeLimit) {
-            _error_log("The plugin [{$pluginName}] takes {$total_time} seconds to complete. URL: " . getSelfURI() . " IP: " . getRealIpAddr(), AVideoLog::$WARNING);
+            _error_log("The plugin [{$pluginName}] takes {$total_time} seconds to complete. URL: " . getSelfURI() . " IP: " . getRealIpAddr() . ' '.json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 50)), AVideoLog::$WARNING);
         }
     }
 
@@ -373,6 +373,22 @@ class AVideoPlugin
     {
         return self::getDataObject($name);
     }
+    
+    public static function setObjectData($name, $object){
+        $p = static::loadPlugin($name);
+        if ($p) {
+            return $p->setDataObject($object);
+        }
+        return false;
+    }
+    
+    public static function setObjectDataParameter($name, $parameterName, $value){
+        $p = static::loadPlugin($name);
+        if ($p) {
+            return $p->setDataObjectParameter($parameterName, $value);
+        }
+        return false;
+    }
 
     public static function getDataObject($name)
     {
@@ -695,14 +711,14 @@ class AVideoPlugin
         }
     }
 
-    public static function afterDonation($from_users_id, $how_much, $videos_id, $users_id)
+    public static function afterDonation($from_users_id, $how_much, $videos_id, $users_id, $extraParameters)
     {
         $plugins = Plugin::getAllEnabled();
         foreach ($plugins as $value) {
             self::YPTstart();
             $p = static::loadPlugin($value['dirName']);
             if (is_object($p)) {
-                $p->afterDonation($from_users_id, $how_much, $videos_id, $users_id);
+                $p->afterDonation($from_users_id, $how_much, $videos_id, $users_id, $extraParameters);
             }
             self::YPTend("{$value['dirName']}::" . __FUNCTION__);
         }
@@ -853,24 +869,29 @@ class AVideoPlugin
 
     public static function getLiveApplicationArray()
     {
-        $plugins = Plugin::getAllEnabled();
-        $array = [];
-        foreach ($plugins as $value) {
-            self::YPTstart();
-            $p = static::loadPlugin($value['dirName']);
-            if (is_object($p)) {
-                $appArray = $p->getLiveApplicationArray();
-                if (is_array($appArray)) {
-                    if (!is_array($array)) {
-                        $array = $appArray;
-                    } else {
-                        $array = array_merge($array, $appArray);
+        global $_getLiveApplicationArrayPlugin;
+        if(!isset($_getLiveApplicationArrayPlugin)){
+            $_getLiveApplicationArrayPlugin = array();
+            $plugins = Plugin::getAllEnabled();
+            $array = [];
+            foreach ($plugins as $value) {
+                self::YPTstart();
+                $p = static::loadPlugin($value['dirName']);
+                if (is_object($p)) {
+                    $appArray = $p->getLiveApplicationArray();
+                    if (is_array($appArray)) {
+                        if (!is_array($array)) {
+                            $array = $appArray;
+                        } else {
+                            $array = array_merge($array, $appArray);
+                        }
                     }
                 }
+                self::YPTend("{$value['dirName']}::" . __FUNCTION__);
             }
-            self::YPTend("{$value['dirName']}::" . __FUNCTION__);
+            $_getLiveApplicationArrayPlugin = $array;
         }
-        return $array;
+        return $_getLiveApplicationArrayPlugin;
     }
 
     public static function getPlayListButtons($playlist_id = "")
@@ -1416,6 +1437,18 @@ class AVideoPlugin
             $p = static::loadPlugin($value['dirName']);
             if (is_object($p)) {
                 $p->onLiveStream($users_id, $live_servers_id);
+            }
+            self::YPTend("{$value['dirName']}::" . __FUNCTION__);
+        }
+    }
+    
+    public static function on_publish_done($live_transmitions_history_id, $users_id, $key, $live_servers_id){
+        $plugins = Plugin::getAllEnabled();
+        foreach ($plugins as $value) {
+            self::YPTstart();
+            $p = static::loadPlugin($value['dirName']);
+            if (is_object($p)) {
+                $p->onLiveStream($live_transmitions_history_id, $users_id, $key, $live_servers_id);
             }
             self::YPTend("{$value['dirName']}::" . __FUNCTION__);
         }

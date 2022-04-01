@@ -119,6 +119,7 @@ if ($serie = PlayLists::isPlayListASerie($pl->getId())) {
 } else if (!empty($playList[$playlist_index])) {
     setVideos_id($playList[$playlist_index]['id']);
 }
+$_REQUEST['hideAutoplaySwitch'] = 1;
 //var_dump($playListData);exit;
 ?>
 
@@ -280,6 +281,7 @@ if ($serie = PlayLists::isPlayListASerie($pl->getId())) {
             var embed_playerPlaylist = <?php echo json_encode($playListData); ?>;
             var originalPlayerPlaylist = embed_playerPlaylist;
             var updatePLSourcesTimeout;
+            var isPlayListPlaying = 0;
             function updatePLSources(_index) {
                 if (_index < 0) {
                     _index = 0;
@@ -298,7 +300,12 @@ if ($serie = PlayLists::isPlayListASerie($pl->getId())) {
 
                     if (typeof embed_playerPlaylist[_index] !== 'undefined') {
                         updatePLSourcesTimeout = setTimeout(function () {
-                            playerPlay(embed_playerPlaylist[_index].videoStartSeconds);
+                            if(!isPlayListPlaying){
+                                playerPlayIfAutoPlay(embed_playerPlaylist[_index].videoStartSeconds);
+                            }else{
+                                playerPlay(embed_playerPlaylist[_index].videoStartSeconds);
+                            }
+                            isPlayListPlaying = 1;
                             if(embed_playerPlaylist[_index].tracks && embed_playerPlaylist[_index].tracks.length){
                                 var _tracks = embed_playerPlaylist[_index].tracks;
                                 setTimeout(function () {

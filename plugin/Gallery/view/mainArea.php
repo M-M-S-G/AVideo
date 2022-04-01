@@ -4,14 +4,31 @@
         include $global['systemRootPath'] . 'plugin/Gallery/view/Category.php';
     }
 
-    if ($obj->searchOnChannels && !empty($_GET['search'])) {
-        $channels = User::getAllUsers(true);
-        //cleanSearchVar();
-        foreach ($channels as $value) {
-            $contentSearchFound = true;
-            createChannelItem($value['id'], $value['photoURL'], $value['identification']);
+    if ($obj->searchOnChannels) {
+        if (!empty($_REQUEST['search'])) {
+            $users_id_array = VideoStatistic::getUsersIDFromChannelsWithMoreViews();
+            $channels = Channel::getChannels(true, "u.id, '" . implode(",", $users_id_array) . "'");
+            if (!empty($channels)) {
+                ?>
+                <div id="channelsResults" class="clear clearfix">
+                    <h3 class="galleryTitle"> <i class="fas fa-user"></i> <?php echo __('Channels'); ?></h3>
+                    <div class="row">
+                        <?php
+                        $search = $_REQUEST['search'];
+                        clearSearch();
+                        foreach ($channels as $value) {
+                            echo '<div class="col-sm-12">';
+                            User::getChannelPanel($value['id']);
+                            echo '</div>';
+                        }
+                        reloadSearch();
+                        ?>
+                    </div>
+                </div>
+                <?php
+                $contentSearchFound = true;
+            }
         }
-        //reloadSearchVar();
     }
     if (!empty($video)) {
         $contentSearchFound = true;
@@ -22,20 +39,20 @@
         echo '<center style="margin:5px;">' . getAdsLeaderBoardTop2() . '</center>';
         if (empty($_GET['catName'])) {
             $objLive = AVideoPlugin::getDataObject('Live');
-            if(empty($objLive->doNotShowLiveOnVideosList)){
-            ?>
-            <!-- For Live Videos -->
-            <div id="liveVideos" class="clear clearfix" style="display: none;">
-                <h3 class="galleryTitle text-danger"> <i class="fas fa-play-circle"></i> <?php echo __("Live"); ?></h3>
-                <div class="extraVideos"></div>
-            </div>
-            <!-- For Live Schedule Videos -->
-            <div id="liveScheduleVideos" class="clear clearfix" style="display: none;">
-                <h3 class="galleryTitle"> <i class="far fa-calendar-alt"></i> <?php echo __($objLive->live_schedule_label); ?></h3>
-                <div class="extraVideos"></div>
-            </div>
-            <!-- For Live Videos End -->
-            <?php
+            if (empty($objLive->doNotShowLiveOnVideosList)) {
+                ?>
+                <!-- For Live Videos -->
+                <div id="liveVideos" class="clear clearfix" style="display: none;">
+                    <h3 class="galleryTitle text-danger"> <i class="fas fa-play-circle"></i> <?php echo __("Live"); ?></h3>
+                    <div class="extraVideos"></div>
+                </div>
+                <!-- For Live Schedule Videos -->
+                <div id="liveScheduleVideos" class="clear clearfix" style="display: none;">
+                    <h3 class="galleryTitle"> <i class="far fa-calendar-alt"></i> <?php echo __($objLive->live_schedule_label); ?></h3>
+                    <div class="extraVideos"></div>
+                </div>
+                <!-- For Live Videos End -->
+                <?php
             }
         }
         echo AVideoPlugin::getGallerySection();
@@ -53,6 +70,10 @@
                     continue;
                 }
                 $countSections++;
+                if(preg_match('/Channel_([0-9]+)_/', $value['name'], $matches)){
+                    $users_id = intval($matches[1]);
+                    User::getChannelPanel($users_id);
+                } else
                 if ($value['name'] == 'Suggested') {
                     createGallery(!empty($obj->SuggestedCustomTitle) ? $obj->SuggestedCustomTitle : __("Suggested"), 'suggested', $obj->SuggestedRowCount, 'SuggestedOrder', "", "", $orderString, "ASC", !$obj->hidePrivateVideos, "fas fa-star");
                 } else
@@ -75,16 +96,16 @@
                     include $global['systemRootPath'] . 'plugin/Gallery/view/mainAreaChannels.php';
                 } else
                 if ($value['name'] == 'Categories' && empty($_GET['showOnly'])) {
-                    if(empty($currentCat) && !empty(getSearchVar())){
+                    if (empty($currentCat) && !empty(getSearchVar())) {
                         $onlySuggested = $obj->CategoriesShowOnlySuggested;
                         cleanSearchVar();
                         $categories = Category::getAllCategories(false, true, $onlySuggested);
-                        reloadSearchVar(); 
+                        reloadSearchVar();
                         foreach ($categories as $value) {
                             $currentCat = $value['clean_name'];
                             include $global['systemRootPath'] . 'plugin/Gallery/view/modeGalleryCategory.php';
                         }
-                    }else{
+                    } else {
                         include $global['systemRootPath'] . 'plugin/Gallery/view/modeGalleryCategory.php';
                     }
                 }

@@ -475,7 +475,7 @@ $t['This creates a download-button under your video, suggest you title.mp4 as do
 $t['This e-mail will be used for this web site notifications'] = 'Этот адрес электронной почты будет использоваться для уведомлений этого веб-сайта.';
 $t['This help us to track and dettect errors'] = 'Это помогает нам отслеживать и обнаруживать ошибки';
 $t['This is an experimental resource'] = 'Это экспериментальный ресурс';
-$t['This page works only with MP4,MP3 and OGG-files, if you have or need any other format, try to install your own <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> or use the <a href=\'https://encoder1.avideo.com/\' class=\'btn btn-warning btn-xs\'>public</a> one'] = 'Эта страница работает только с MP4 файлами, если у вас есть или вам нужен какой-либо другой формат, попробуйте установить свой собственный <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> или используйте <a href=\'https://encoder1.avideo.com/\' class=\'btn btn-warning btn-xs\'> общедоступный </a>';
+$t['This page works only with MP4,MP3 and OGG-files, if you have or need any other format, try to install your own <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> or use the <a href=\'https://encoder1.wwbn.net/\' class=\'btn btn-warning btn-xs\'>public</a> one'] = 'Эта страница работает только с MP4 файлами, если у вас есть или вам нужен какой-либо другой формат, попробуйте установить свой собственный <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> или используйте <a href=\'https://encoder1.wwbn.net/\' class=\'btn btn-warning btn-xs\'> общедоступный </a>';
 $t['This value must match with the language files on'] = 'Это значение должно соответствовать языковым файлам на';
 $t['This video was reported to our team, we will review it soon'] = 'На это видео было указано нашей команде, мы скоро рассмотрим его';
 $t['Thumbs Down'] = 'Нравится';
@@ -696,7 +696,7 @@ $t['Your video has NOT been saved!'] = 'Ваше видео не было сох
 $t['Your video is downloading now'] = 'Ваше видео сейчас загружается';
 $t['Your videos have been saved!'] = 'Ваши видео были сохранены!';
 $t['Zip Code'] = 'Почтовый код';
-$t['ago'] = 'тому назад';
+$t['ago'] = 'назад';
 $t['arrow'] = 'стрелка';
 $t['day'] = 'день';
 $t['days'] = 'дней';
@@ -709,7 +709,7 @@ $t['is Admin'] = 'Администратор';
 $t['minute'] = 'минута';
 $t['minutes'] = 'минут';
 $t['month'] = 'месяц';
-$t['months'] = 'месяцев';
+$t['months'] = 'месяца';
 $t['pause'] = 'пауза';
 $t['remaining'] = 'осталось';
 $t['second'] = 'второй';
@@ -718,7 +718,7 @@ $t['space'] = 'пробел';
 $t['week'] = 'неделя';
 $t['weeks'] = 'недель';
 $t['year'] = 'год';
-$t['years'] = 'лет';
+$t['years'] = 'года';
 $t['youtube-dl uses Python and some servers does not came with python as default, to install Python type:'] = 'youtube-dl использует Python, и некоторые серверы не поставляются с python по умолчанию, для установки Python:';
 
 
@@ -1264,7 +1264,7 @@ $t['This is not a valid URL'] = 'This is not a valid URL';
 $t['This is not a valid email'] = 'This is not a valid email';
 $t['This is useful if you want to use our LDAP plugin or maybe only allowauthentication from Social Networks'] = 'This is useful if you want to use our LDAP plugin or maybe only allowauthentication from Social Networks';
 $t['This option will not make your videos private, this option is for other users not to be able to include their videos in this category. to make your videos private use the user groups feature'] = 'This option will not make your videos private, this option is for other users not to be able to include their videos in this category. to make your videos private use the user groups feature';
-$t['This page works only with an MP4 File, if you have or need any other format, try to install your own <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> or use the <a href=\'https://encoder1.avideo.com/\' class=\'btn btn-warning btn-xs\'>public</a> one'] = 'This page works only with an MP4 File, if you have or need any other format, try to install your own <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> or use the <a href=\'https://encoder1.avideo.com/\' class=\'btn btn-warning btn-xs\'>public</a> one';
+$t['This page works only with an MP4 File, if you have or need any other format, try to install your own <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> or use the <a href=\'https://encoder1.wwbn.net/\' class=\'btn btn-warning btn-xs\'>public</a> one'] = 'This page works only with an MP4 File, if you have or need any other format, try to install your own <a href=\'https://github.com/WWBN/AVideo-Encoder\' class=\'btn btn-warning btn-xs\'>encoder</a> or use the <a href=\'https://encoder1.wwbn.net/\' class=\'btn btn-warning btn-xs\'>public</a> one';
 $t['This playlist is private, click to make it public'] = 'This playlist is private, click to make it public';
 $t['This playlist is public, click to make it unlisted'] = 'This playlist is public, click to make it unlisted';
 $t['This playlist is unlisted, click to make it private'] = 'This playlist is unlisted, click to make it private';

@@ -83,7 +83,8 @@ $sideAd = getAdsSideRectangle();
 
 $modeYoutubeBottomClass1 = "col-sm-7 col-md-7 col-lg-6";
 $modeYoutubeBottomClass2 = "col-sm-5 col-md-5 col-lg-4 ";
-if (empty($sideAd) && !AVideoPlugin::loadPluginIfEnabled("Chat2")) {
+
+if (isHTMLEmpty($sideAd)) {
     $modeYoutubeBottomClass1 = "col-sm-12 col-md-12 col-lg-10";
     $modeYoutubeBottomClass2 = "hidden ";
 }
@@ -113,7 +114,7 @@ if (empty($sideAd) && !AVideoPlugin::loadPluginIfEnabled("Chat2")) {
         <?php
         include $global['systemRootPath'] . 'view/include/navbar.php';
         ?>
-        <div class="container-fluid principalContainer" style="padding: 0;" id="modeYoutubePrincipal">
+        <div class="container-fluid principalContainer" style="padding: 0;overflow: hidden;" id="modeYoutubePrincipal">
             <?php
             if (!$isCompressed) {
                 ?>

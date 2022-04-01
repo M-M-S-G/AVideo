@@ -53,10 +53,11 @@ class Configuration
     public function load()
     {
         global $global;
+        _mysql_connect();
         $sql = "SELECT * FROM configurations WHERE id = 1 LIMIT 1";
         //echo $sql;exit;
         // add true because I was not getting the SMTP configuration on function setSiteSendMessage(&$mail)
-        $res = sqlDAL::readSql($sql, "", [], true);
+        $res = sqlDAL::readSql($sql, '', [], true);
         $result = sqlDAL::fetchAssoc($res);
         sqlDAL::close($res);
         if ($res && !empty($result)) {
@@ -537,7 +538,7 @@ require_once \$global['systemRootPath'].'objects/include_config.php';
         if (empty($advancedCustom->useEncoderNetworkRecomendation) || empty($advancedCustom->encoderNetwork)) {
             return false;
         }
-        if ($advancedCustom->encoderNetwork === 'https://network.avideo.com/') {
+        if ($advancedCustom->encoderNetwork === 'https://network.wwbn.net/') {
             // check if you have your own encoder
             $encoderConfigFile = "{$global['systemRootPath']}Encoder/videos/configuration.php";
             if (file_exists($encoderConfigFile)) { // you have an encoder do not use the public one
@@ -594,7 +595,7 @@ require_once \$global['systemRootPath'].'objects/include_config.php';
                 }
 
                 if (empty($this->encoderURL)) {
-                    $getEncoderURL = "https://encoder1.avideo.com/";
+                    $getEncoderURL = "https://encoder1.wwbn.net/";
                 }
                 addLastSlash($this->encoderURL);
                 $getEncoderURL = $this->encoderURL;

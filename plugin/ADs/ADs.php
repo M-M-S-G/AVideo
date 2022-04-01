@@ -97,7 +97,8 @@ class ADs extends PluginAbstract
 
     public function getHeadCode()
     {
-        $head = "<script> var adsbygoogleTimeout; </script>";
+        $head = "";
+        //$head .= "<script> var adsbygoogleTimeout = []; </script>";
         if (!empty($_GET['abkw'])) {
             $abkw = preg_replace('/[^a-zA-Z0-9_ ,-]/', '', $_GET['abkw']);
             $head .= "<script> window.abkw = '{$abkw}'; </script>";
@@ -134,16 +135,17 @@ class ADs extends PluginAbstract
         return "{$head}<script> window.abkw = 'home-page'; </script>";
     }
 
-    public static function giveGoogleATimeout($adCode)
-    {
+    public static function giveGoogleATimeout($adCode){
+        global $adsbygoogle_timeout;
         $videos_id = getVideos_id();
         $showAds = AVideoPlugin::showAds($videos_id);
         if (!$showAds) {
             return "";
         }
         if (preg_match("/adsbygoogle/i", $adCode)) {
-            $adCode = str_replace("(adsbygoogle = window.adsbygoogle || []).push({});", "clearTimeout(adsbygoogleTimeout); adsbygoogleTimeout = setTimeout(function () {(adsbygoogle = window.adsbygoogle || []).push({});},5000);", trim($adCode));
-            $adCode = "<div style='min-width:250px;min-height:90px;'>{$adCode}</div>";
+            $uid = uniqid();
+            $adCode = str_replace("(adsbygoogle = window.adsbygoogle || []).push({});", "$(function () {startGoogleAd('#adContainer{$uid}');});", trim($adCode));
+            $adCode = "<div style='min-width:250px;min-height:90px;' id='adContainer{$uid}'>{$adCode}</div>";
         }
         return $adCode;
     }
@@ -287,7 +289,7 @@ class ADs extends PluginAbstract
             $active = '';
         }
 
-        if (count($validPaths) > 1) {
+        if ($validPaths > 1) {
             $html .= "
               <a class=\"left carousel-control\" href=\"#{$id}\" data-slide=\"prev\">
                 <span class=\"glyphicon glyphicon-chevron-left\"></span>

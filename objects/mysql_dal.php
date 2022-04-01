@@ -85,7 +85,7 @@ class sqlDAL
                 try {
                     $audit->exec(@$debug[1]['function'], @$debug[1]['class'], $preparedStatement, $formats, json_encode($values), User::getId());
                 } catch (Exception $exc) {
-                    echo log_error($exc->getTraceAsString());
+                    log_error($exc->getTraceAsString());
                 }
             }
         }
@@ -95,14 +95,22 @@ class sqlDAL
         }
 
         if (!($stmt = $global['mysqli']->prepare($preparedStatement))) {
-            log_error("[sqlDAL::writeSql] Prepare failed: (" . $global['mysqli']->errno . ") " . $global['mysqli']->error . " ({$preparedStatement})");
+            log_error("[sqlDAL::writeSql] Prepare failed: (" . $global['mysqli']->errno . ") " . $global['mysqli']->error . 
+                    " preparedStatement = ". json_encode($preparedStatement). 
+                    " formats = ". json_encode($formats));
             return false;
         }
         if (!sqlDAL::eval_mysql_bind($stmt, $formats, $values)) {
             log_error("[sqlDAL::writeSql]  eval_mysql_bind failed: values and params in stmt don't match ({$preparedStatement}) with formats ({$formats})");
             return false;
         }
-        $stmt->execute();
+        try {
+            $stmt->execute();
+        } catch (Exception $exc) {
+            log_error($exc->getTraceAsString());
+            log_error('Error in writeSql stmt->execute: '.$preparedStatement);
+        }
+
         if ($stmt->errno !== 0) {
             log_error('Error in writeSql : (' . $stmt->errno . ') ' . $stmt->error . ", SQL-CMD:" . $preparedStatement);
             $stmt->close();
@@ -149,7 +157,12 @@ class sqlDAL
                 _mysql_connect();
 
                 if (!($stmt = $global['mysqli']->prepare($preparedStatement))) {
-                    log_error("[sqlDAL::readSql] (mysqlnd) Prepare failed: (" . $global['mysqli']->errno . ") " . $global['mysqli']->error . " ({$preparedStatement}) - format=({$formats}) values=" . json_encode($values));
+                    log_error("[sqlDAL::readSql] (mysqlnd) Prepare failed: ({$global['mysqli']->errno}) ({$global['mysqli']->error}) ".
+                    " preparedStatement = ". json_encode($preparedStatement). 
+                    " formats = ". json_encode($formats).
+                    " values = ". json_encode($values).
+                    " refreshCache = ". json_encode($refreshCache).
+                    " stmt = ". json_encode($stmt));
                     //log_error("[sqlDAL::readSql] trying close and reconnect");
                     _mysql_close();
                     _mysql_connect();
@@ -460,9 +473,10 @@ class sqlDAL
 
 function log_error($err)
 {
-    if (!empty($global['debug'])) {
+    if (!empty($global['debug']) || isCommandLineInterface()) {
         echo $err;
     }
-    _error_log("MySQL ERROR: ".json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)), AVideoLog::$ERROR);
+    
+    _error_log("MySQL ERROR: ".json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)), AVideoLog::$ERROR);
     _error_log($err, AVideoLog::$ERROR);
 }

@@ -138,6 +138,10 @@ class LiveTransmition extends ObjectYPT
     public static function getFromDbByUser($user_id)
     {
         global $global;
+        if (!self::isTableInstalled(static::getTableName())) {
+            _error_log("Save error, table " . static::getTableName() . " does not exists", AVideoLog::$ERROR);
+            return false;
+        }
         $user_id = intval($user_id);
         $sql = "SELECT * FROM " . static::getTableName() . " WHERE  users_id = ? LIMIT 1";
         $res = sqlDAL::readSql($sql, "i", [$user_id], true);
@@ -306,7 +310,7 @@ class LiveTransmition extends ObjectYPT
         Category::clearCacheCount();
         Live::deleteStatsCache(true);
 
-        $socketObj = sendSocketMessageToAll(['stats'=>getStatsNotifications()], "socketLiveONCallback");
+        $socketObj = sendSocketMessageToAll(['stats'=>getStatsNotifications(false, false)], "socketLiveONCallback");
 
         return $id;
     }
@@ -395,8 +399,7 @@ class LiveTransmition extends ObjectYPT
         }
     }
 
-    public static function getFromKey($key, $checkSchedule = true)
-    {
+    public static function getFromKey($key, $checkSchedule = true){
         global $global;
         return self::keyExists($key, $checkSchedule);
     }
@@ -439,5 +442,16 @@ class LiveTransmition extends ObjectYPT
     {
         $lt = self::getFromDbByUser($users_id);
         return !empty($lt['saveTransmition']);
+    }
+    
+    
+    static function getUsers_idOrCompanyFromKey($key) {
+        
+        $row = self::getFromKey($key);
+        if(!empty($row['users_id_company'])){
+            return $row['users_id_company'];
+        }
+        
+        return $row['users_id'];
     }
 }

@@ -26,10 +26,21 @@ $obj->variations = array();
 if (file_exists($obj->imagePNG)) {
     unlink($obj->imagePNG);
 }
+try {
+    _error_log("uploadChannelArt {$obj->imageJPG} ". json_encode($obj->imageJPGResponse));
+    if(preg_match('/.png$/i', $obj->imageJPG)){
+        $im = imagecreatefrompng($obj->imageJPG);
+    }else{
+        $im = imagecreatefromjpeg($obj->imageJPG);
+    }
+    $width = imagesx($im);
+    $height = imagesy($im);
+} catch (Exception $exc) {
+    $obj->msg = $exc->getTraceAsString();
+    $obj->imageJPG = $obj->imageJPG;
+    die(json_encode($obj));
+}
 
-$im = imagecreatefromjpeg($obj->imageJPG);
-$width = imagesx($im);
-$height = imagesy($im);
 
 foreach (User::$channel_art as $value) {
     $x = ($width - $value[1])/2;

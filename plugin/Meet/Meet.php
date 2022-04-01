@@ -103,8 +103,11 @@ Passcode: {password}
         }
         $m = new Meet_schedule($meet_schedule_id);
         $room = $m->getCleanName();
+        
+        $isModerator = self::isModerator($meet_schedule_id);
+        
         if (empty($users_id)) {
-            $user = [];
+            $user = ["affiliation"=> ($isModerator?'owner':'member')];
         } else {
             $u = new User($users_id);
             $user = [
@@ -112,6 +115,7 @@ Passcode: {password}
                 "name" => $u->getNameIdentificationBd(),
                 "email" => $u->getEmail(),
                 "id" => $users_id,
+                "affiliation"=> ($isModerator?'owner':'member'),
             ];
         }
 
@@ -125,7 +129,7 @@ Passcode: {password}
             "sub" => "meet.jitsi",
             "room" => $room,
             "exp" => strtotime("+30 hours"),
-            "moderator" => self::isModerator($meet_schedule_id),
+            "moderator" => $isModerator,
         ];
         return $jitsiPayload; // HS256
     }
@@ -609,6 +613,13 @@ Passcode: {password}
         $invitation = preg_replace("/{UserName}/i", User::getNameIdentificationById($ms->getUsers_id()), $invitation);
         $invitation = preg_replace("/{meetLink}/i", $ms->getMeetLink(), $invitation);
         return $invitation;
+    }
+    
+    public static function getIframeURL($meet_schedule_id){
+        $joinURL = self::getJoinURL();
+        $joinURL = addLastSlash($joinURL);
+        $roomID = self::getRoomID($meet_schedule_id);
+        return "{$joinURL}{$roomID}";
     }
 
     public static function validatePassword($meet_schedule_id, $password)

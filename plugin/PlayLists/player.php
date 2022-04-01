@@ -121,7 +121,7 @@ if(empty($playListData)){
             <?php
         }
         ?>
-        <div class="container-fluid principalContainer">
+        <div class="container-fluid principalContainer" style="overflow: hidden;">
             <?php
             if (!empty($playListObj)) {
                 if (!empty($advancedCustom->showAdsenseBannerOnTop)) {
@@ -212,7 +212,7 @@ if(empty($playListData)){
                                             var playerPlaylist = <?php echo json_encode($playListData); ?>;
                                             var originalPlayerPlaylist = playerPlaylist;
 
-                                            if (typeof player === 'undefined') {
+                                            if (typeof player === 'undefined' && $('#mainVideo').length) {
                                                 player = videojs('mainVideo'<?php echo PlayerSkins::getDataSetup(); ?>);
                                             }
 

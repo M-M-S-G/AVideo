@@ -164,6 +164,19 @@ if (empty($meet_schedule_id)) {
         api.addEventListeners({
             readyToClose: readyToClose,
         });
+        
+        <?php
+        if(!empty($rtmpLink) && !empty($_REQUEST['startLiveMeet'])){
+            ?>
+                console.log('Live meet will start in 5 seconds');
+                setTimeout(function(){
+                    console.log('Live meet will start now');
+                    startLiveMeet();
+                },5000);
+            <?php
+        }
+        ?>
+        
 
     }
 
@@ -244,5 +257,9 @@ if (!empty($rtmpLink) && Meet::isModerator($meet_schedule_id)) {
         if (typeof _readyToClose == "function") {
             _readyToClose();
         }
+    }    
+            
+    function startLiveMeet(){
+        aVideoMeetStartRecording('<?php echo $rtmpLink; ?>', '<?php echo $dropURL; ?>');
     }
 </script>

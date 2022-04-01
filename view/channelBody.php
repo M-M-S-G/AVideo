@@ -130,6 +130,7 @@ $obj = AVideoPlugin::getObjectData("YouPHPFlix2");
                         ?></h2>
                     <span class="pull-right">
                         <?php
+                        echo User::getAddChannelToGalleryButton($user_id);
                         echo User::getBlockUserButton($user_id);
                         echo Subscribe::getButton($user_id);
                         ?>
@@ -191,7 +192,7 @@ $obj = AVideoPlugin::getObjectData("YouPHPFlix2");
                                 $active = '';
                 }
                 if ($advancedCustomUser->showChannelProgramsTab && !empty($palyListsObj)) {
-                    $totalPrograms = PlayList::getAllFromUserLight($user_id, true, false, 0, true);
+                    $totalPrograms = PlayList::getAllFromUserLight($user_id, true, false, 0, true, true);
                     if ($totalPrograms) {
                         ?>
                                     <li class="nav-item <?php echo $active; ?>" id="channelPlayListsLi">
@@ -218,13 +219,14 @@ $obj = AVideoPlugin::getObjectData("YouPHPFlix2");
                                     $obj->BigVideo = true;
                     $obj->PlayList = false;
                     $obj->Channels = false;
-                    $obj->Trending = true;
+                    $obj->Trending = false;
                     $obj->pageDots = false;
-                    $obj->TrendingAutoPlay = true;
+                    $obj->TrendingAutoPlay = false;
                     $obj->maxVideos = 12;
                     $obj->Suggested = false;
                     $obj->paidOnlyLabelOverPoster = false;
-                    $obj->DateAdded = false;
+                    $obj->DateAdded = true;
+                    $obj->DateAddedAutoPlay = true;
                     $obj->MostPopular = false;
                     $obj->MostWatched = false;
                     $obj->SortByName = false;
@@ -297,7 +299,7 @@ $obj = AVideoPlugin::getObjectData("YouPHPFlix2");
                                             if ($isMyChannel) {
                                                 ?>
                                                 <a class="btn btn-default btn-xs " href="<?php echo $global['webSiteRootURL']; ?>plugin/PlayLists/managerPlaylists.php">
-                                                    <i class="fas fa-edit"></i> <?php echo __('Organize') . ' ' . $palyListsObj->name; ?>
+                                                    <i class="fas fa-edit"></i> <?php echo __('Organize') . ' ' . __($palyListsObj->name); ?>
                                                 </a>
                                                 <?php
                                             } ?>

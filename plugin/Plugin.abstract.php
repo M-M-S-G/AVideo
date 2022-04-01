@@ -227,7 +227,7 @@ abstract class PluginAbstract {
         return false;
     }
     
-    public function afterDonation($from_users_id, $how_much, $videos_id, $users_id) {
+    public function afterDonation($from_users_id, $how_much, $videos_id, $users_id, $extraParameters) {
         return false;
     }
 
@@ -478,6 +478,10 @@ abstract class PluginAbstract {
     }
 
     public function onLiveStream($users_id, $live_servers_id) {
+        return null;
+    }
+    
+    public function on_publish_done($live_transmitions_history_id, $users_id, $key, $live_servers_id) {
         return null;
     }
 
