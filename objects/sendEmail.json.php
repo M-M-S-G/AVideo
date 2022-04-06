@@ -34,7 +34,7 @@ if ($valid) {
 
     if (filter_var($sendTo, FILTER_VALIDATE_EMAIL)) {
         $mail->AddReplyTo($replyTo);
-        $mail->setFrom($replyTo);
+        $mail->setFrom($config->getContactEmail());
         //Set who the message is to be sent to
         $mail->addAddress($sendTo);
         //Set the subject line
