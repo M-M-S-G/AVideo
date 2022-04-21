@@ -268,9 +268,9 @@ footer .footerNote span {
     .section1 .sectionTitleRule, .section2 .sectionTitleRule {
         width: 100%;
     }
-    .section1 .sectionTitleRule2, .section2 .sectionTitleRule2 {
-        display: none;
-    }
+    /*.section1 .sectionTitleRule2, .section2 .sectionTitleRule2 {*/
+    /*    display: none;*/
+    /*}*/
     .mainContent .section1 .section1Content {
         display: inline-block;
         text-align: left;
@@ -335,9 +335,9 @@ footer .footerNote span {
     .section1 .sectionTitleRule, .section2 .sectionTitleRule {
         width: 100%;
     }
-    .section1 .sectionTitleRule2, .section2 .sectionTitleRule2 {
-        display: none;
-    }
+    /*.section1 .sectionTitleRule2, .section2 .sectionTitleRule2 {*/
+    /*    display: none;*/
+    /*}*/
     .mainContent .section1 .section1Content {
         display: block;
         margin: 0% 0% 0% 20%;
