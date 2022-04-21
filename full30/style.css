@@ -259,7 +259,7 @@ footer .footerNote span {
     }
     /* Main content sections */
     .mainContent .section1 {
-        text-align: center;
+        /*text-align: center;*/
         margin-bottom: 10%;
     }
     .section1 .section1Title, .section2 .section1Title {
