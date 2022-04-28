@@ -83,7 +83,7 @@ function getEnabledLangs() {
     return $flags;
 }
 
-function textToLink($string, $targetBlank = false) {
+function textToLink($string, $targetBlank = true) {
     $target = "";
     if ($targetBlank) {
         $target = "target=\"_blank\"";
